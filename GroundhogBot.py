@@ -23,7 +23,7 @@ REACTION = "exclamation"
 
 
 def database_setup():
-   """
+    """
         Checks if database is already created. If not creates and populates it with members anc channels data.
     """
 
@@ -45,7 +45,7 @@ def database_setup():
 
 
 def check_url(url, ts, user, chan):
-   """
+    """
         Checks url for duplicates in database of previously posted urls.
     """
     conn = sqlite3.connect('groundhog.sqlite')
