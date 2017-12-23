@@ -8,6 +8,7 @@ import time
 import re
 import sqlite3
 import sys
+import argparse
 from slackclient import SlackClient
 
 # instantiate Slack client
@@ -19,7 +20,6 @@ starterbot_id = None
 RTM_READ_DELAY = 1  # 1 second delay between reading from RTM
 EXAMPLE_COMMAND = "do"
 MENTION_REGEX = "^<@(|[WU].+)>(.*)"
-REACTION = "exclamation"
 
 
 def database_setup():
@@ -66,7 +66,7 @@ def check_url(url, ts, user, chan):
         slack_client.api_call(
             "reactions.add",
             channel=chan,
-            name=REACTION,
+            name=reaction,
             timestamp=ts)
         slack_client.api_call(
             "chat.postMessage",
@@ -149,6 +149,11 @@ def handle_command(command, channel):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--reaction', type=str, default="exclamation",
+                        help='Optional groundhog reaction emoji name')
+    args = parser.parse_args()
+    reaction = args.reaction
     if slack_client.rtm_connect(with_team_state=False):
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
