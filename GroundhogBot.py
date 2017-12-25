@@ -63,6 +63,8 @@ def check_url(url, ts, user, chan):
         who = cur.fetchall()[0][0]
         cur.execute('SELECT name FROM Channels WHERE id = ?', (where,))
         where = cur.fetchall()[0][0]
+        cur.execute('SELECT name FROM Members WHERE id = ?', (user,))
+        bad_user = cur.fetchall()[0][0]
         minutes = str(int((float(ts) - float(when)) / 60))
         slack_client.api_call(
             "reactions.add",
@@ -76,7 +78,7 @@ def check_url(url, ts, user, chan):
             text=_("{user_who_posted_duplicate}, look! Are you paying attention? "
                  "{duplicate_url} was already posted by *{user_who_posted_first}* "
                  "on channel *#{channel_name}* just *{number_of_minutes} min. ago.")
-                 .format(user_who_posted_duplicate=user, duplicate_url=url, user_who_posted_first=who,
+                 .format(user_who_posted_duplicate=bad_user, duplicate_url=url, user_who_posted_first=who,
                          channel_name=where, number_of_minutes=minutes))
 
 
