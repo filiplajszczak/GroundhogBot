@@ -9,6 +9,7 @@ import re
 import sqlite3
 import sys
 import argparse
+import gettext
 from slackclient import SlackClient
 
 # instantiate Slack client
@@ -72,7 +73,11 @@ def check_url(url, ts, user, chan):
             "chat.postMessage",
             channel=chan,
             username="GroundhogBot",
-            text="Człowieniu, ogarnij się! Masz Ty Rozum i Godność Człowieka? Link {} był już zapodany przez juzera *{}* na kanale *#{}* raptem *{} min.* temu.".format(url, who, where, minutes))
+            text=_("{user_who_posted_duplicate}, look! Are you paying attention? "
+                 "{duplicate_url} was already posted by *{user_who_posted_first}* "
+                 "on channel *#{channel_name}* just *{number_of_minutes} min. ago.")
+                 .format(user_who_posted_duplicate=user, duplicate_url=url, user_who_posted_first=who,
+                         channel_name=where, number_of_minutes=minutes))
 
 
 def append_url(url, ts, user, chan):
@@ -105,7 +110,7 @@ def parse_events(slack_events):
             if user_id == starterbot_id:
                 handle_command(message, event["channel"])
 
-        if event["type"] == "message" and "subtype" not in event and event["text"] == "Głupi bot":
+        if event["type"] == "message" and "subtype" not in event and (event["text"] == "Stupid bot" or event["text"] == "Głupi bot"):
             slack_client.api_call(
                 "reactions.add",
                 channel=event["channel"],
@@ -115,7 +120,7 @@ def parse_events(slack_events):
                 "chat.postMessage",
                 channel=event["channel"],
                 username="GroundhogBot",
-                text="Sam jesteś głupi!")
+                text=_("You are stupid!"))
 
 
 def parse_direct_mention(message_text):
@@ -152,8 +157,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--reaction', type=str, default="exclamation",
                         help='Optional groundhog reaction emoji name')
+    parser.add_argument('--language', type=str, default="en_US",
+                        help='Set other language. (default: en_US, available: pl_PL)')
     args = parser.parse_args()
     reaction = args.reaction
+    if args.language == "pl_PL":
+        pl_PL = gettext.translation('GroundhogBot', localedir='locale', languages=['pl_PL'])
+        pl_PL.install()
+    else:
+        _ = lambda s: s
     if slack_client.rtm_connect(with_team_state=False):
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
