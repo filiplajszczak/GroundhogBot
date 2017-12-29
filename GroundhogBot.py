@@ -144,7 +144,6 @@ def handle_command(command, channel):
 
 def check_rules(event):
     for rule in rules:
-        print(rule)
         if (event["type"] == "message"
                 and "subtype" not in event
                 and rule["text_trigger"] in event["text"].lower()
