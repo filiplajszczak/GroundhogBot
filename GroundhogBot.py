@@ -10,6 +10,7 @@ import sqlite3
 import sys
 import argparse
 import gettext
+import json
 from slackclient import SlackClient
 
 # instantiate Slack client
@@ -59,17 +60,14 @@ def check_url(url, ts, user, chan):
         cur.execute('SELECT ts, user, channel FROM Urls WHERE url = ?', (url,))
         first = cur.fetchall()
         (when, who, where) = first[0]
-        cur.execute('SELECT name FROM Members WHERE id = ?', (who,))
-        who = cur.fetchall()[0][0]
-        cur.execute('SELECT name FROM Channels WHERE id = ?', (where,))
-        where = cur.fetchall()[0][0]
-        cur.execute('SELECT name FROM Members WHERE id = ?', (user,))
-        bad_user = cur.fetchall()[0][0]
+        who = find_user(who)
+        where = find_channel(where)
+        bad_user = find_user(user)
         minutes = str(int((float(ts) - float(when)) / 60))
         slack_client.api_call(
             "reactions.add",
             channel=chan,
-            name=reaction,
+            name=duplicate_url_reaction,
             timestamp=ts)
         slack_client.api_call(
             "chat.postMessage",
@@ -80,17 +78,17 @@ def check_url(url, ts, user, chan):
                  "on channel *#{channel_name}* just *{number_of_minutes} min.* ago.")
                  .format(user_who_posted_duplicate=bad_user, duplicate_url=url, user_who_posted_first=who,
                          channel_name=where, number_of_minutes=minutes))
-
+    conn.close()
 
 def append_url(url, ts, user, chan):
     """
         Appends unique url to the database
     """
-    conn = sqlite3.connect('groundhog.sqlite')
-    cur = conn.cursor()
-    cur.execute("INSERT INTO Urls (ts, user, channel, url) VALUES (?, ?, ?, ?)", (ts, user, chan, url))
-    conn.commit()
-    conn.close()
+    conn2 = sqlite3.connect('groundhog.sqlite')
+    cur2 = conn2.cursor()
+    cur2.execute("INSERT INTO Urls (ts, user, channel, url) VALUES (?, ?, ?, ?)", (ts, user, chan, url))
+    conn2.commit()
+    conn2.close()
 
 
 def parse_events(slack_events):
@@ -107,22 +105,12 @@ def parse_events(slack_events):
                 e = sys.exc_info()[0]
                 print(e)
 
-        if event["type"] == "message" and not "subtype" in event:
+        if event["type"] == "message" and "subtype" not in event:
             user_id, message = parse_direct_mention(event["text"])
             if user_id == starterbot_id:
                 handle_command(message, event["channel"])
 
-        if event["type"] == "message" and "subtype" not in event and (event["text"] == "Stupid bot" or event["text"] == "Głupi bot"):
-            slack_client.api_call(
-                "reactions.add",
-                channel=event["channel"],
-                name="rage",
-                timestamp=event["ts"])
-            slack_client.api_call(
-                "chat.postMessage",
-                channel=event["channel"],
-                username="GroundhogBot",
-                text=_("You are stupid!"))
+        check_rules(event)
 
 
 def parse_direct_mention(message_text):
@@ -154,6 +142,50 @@ def handle_command(command, channel):
         channel=channel,
         text=response or default_response)
 
+def check_rules(event):
+    for rule in rules:
+        print(rule)
+        if (event["type"] == "message"
+                and "subtype" not in event
+                and rule["text_trigger"] in event["text"].lower()
+                and (rule["user_trigger"] == []
+                     or find_user(event["user"]) in rule["user_trigger"])):
+            reaction_add(event["channel"], rule["emoji_reaction"], event["ts"])
+            message_post(event["channel"], rule["text_reaction"])
+
+
+def find_user(who):
+    conn2 = sqlite3.connect('groundhog.sqlite')
+    cur2 = conn2.cursor()
+    cur2.execute('SELECT name FROM Members WHERE id = ?', (who,))
+    who = cur2.fetchall()[0][0]
+    conn2.close()
+    return who
+
+
+def find_channel(where):
+    conn2 = sqlite3.connect('groundhog.sqlite')
+    cur2 = conn2.cursor()
+    cur2.execute('SELECT name FROM Channels WHERE id = ?', (where,))
+    where = cur2.fetchall()[0][0]
+    conn2.close()
+    return where
+
+
+def reaction_add(where, what, target):
+    slack_client.api_call(
+        "reactions.add",
+        channel=where,
+        name=what,
+        timestamp=target)
+
+
+def message_post(where, what):
+    slack_client.api_call(
+        "chat.postMessage",
+        channel=where,
+        username="GroundhogBot",
+        text=what)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -161,8 +193,11 @@ if __name__ == "__main__":
                         help='Optional groundhog reaction emoji name')
     parser.add_argument('--language', type=str, default="en_US",
                         help='Set other language. (default: en_US, available: pl_PL)')
+    parser.add_argument('--rules', type=str, default="default.json",
+                        help='Point json file establishing custom set of bot reaction rules (default: default.json)')
     args = parser.parse_args()
-    reaction = args.reaction
+    duplicate_url_reaction = args.reaction
+    rules = json.load(open(args.rules, encoding='utf8'))["reactions"]
     if args.language == "pl_PL":
         pl_PL = gettext.translation('GroundhogBot', localedir='locale', languages=['pl_PL'])
         pl_PL.install()

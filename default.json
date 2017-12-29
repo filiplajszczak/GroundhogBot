@@ -1,0 +1,16 @@
+{
+  "reactions": [
+    {
+      "user_trigger": [],
+      "text_trigger": "stupid bot",
+      "emoji_reaction": "rage",
+      "text_reaction": "You are stupid!"
+    },
+    {
+      "user_trigger": [],
+      "text_trigger": "głupi bot",
+      "emoji_reaction": "rage",
+      "text_reaction": "Sam jesteś głupi!"
+    }
+  ]
+}
