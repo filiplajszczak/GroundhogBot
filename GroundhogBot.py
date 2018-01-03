@@ -11,6 +11,7 @@ import sys
 import argparse
 import gettext
 import json
+import configparser
 from slackclient import SlackClient
 
 # instantiate Slack client
@@ -187,21 +188,32 @@ def message_post(where, what):
         text=what)
 
 if __name__ == "__main__":
+
+    # Read default configuration from GroundhogBot.config file
+    config = configparser.ConfigParser()
+    config.read('GroundhogBot.config')
+    config_default = config["DEFAULT"]
+
+    # Read custom configuration from command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--reaction', type=str, default="exclamation",
+    parser.add_argument('--reaction', type=str, default=config_default["reaction"],
                         help='Optional groundhog reaction emoji name')
-    parser.add_argument('--language', type=str, default="en_US",
+    parser.add_argument('--language', type=str, default=config_default["language"],
                         help='Set other language. (default: en_US, available: pl_PL)')
-    parser.add_argument('--rules', type=str, default="default.json",
+    parser.add_argument('--rules', type=str, default=config_default["rules"],
                         help='Point json file establishing custom set of bot reaction rules (default: default.json)')
     args = parser.parse_args()
     duplicate_url_reaction = args.reaction
     rules = json.load(open(args.rules, encoding='utf8'))["reactions"]
+
+    # Set language
     if args.language == "pl_PL":
         pl_PL = gettext.translation('GroundhogBot', localedir='locale', languages=['pl_PL'])
         pl_PL.install()
     else:
         _ = lambda s: s
+
+    # Try connect and run main loop
     if slack_client.rtm_connect(with_team_state=False):
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
