@@ -5,25 +5,37 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2017-12-24 23:24-0000\n"
-"PO-Revision-Date: 2017-12-29 00:15+0000\n"
+"POT-Creation-Date: 2018-01-03 14:52-0000\n"
+"PO-Revision-Date: 2018-01-03 14:55+0000\n"
+"Last-Translator: \n"
 "Language-Team: \n"
+"Language: pl_PL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 2.0.5\n"
-"Last-Translator: \n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n"
-"%100>=20) ? 1 : 2);\n"
-"Language: pl_PL\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
 
-#: GroundhogBot.py:76
+#: GroundhogBot.py:69
+msgid "{number_of_minutes} min."
+msgstr "{number_of_minutes} min."
+
+#: GroundhogBot.py:71
+msgid "{number_of_hours} hours"
+msgstr "{number_of_hours} godzin"
+
+#: GroundhogBot.py:73
+msgid "{number_of_days} days"
+msgstr "{number_of_days} dni"
+
+#: GroundhogBot.py:84
 msgid ""
-"*{user_who_posted_duplicate}*, look! Are you paying attention? {duplicate_url} was "
-"already posted by *{user_who_posted_first}* on channel *#{channel_name}* just "
-"*{number_of_minutes} min.* ago."
+"*{user_who_posted_duplicate}*, look! Are you paying attention? "
+"{duplicate_url} was already posted by *{user_who_posted_first}* on channel "
+"*#{channel_name}* just *{time}* ago."
 msgstr ""
-"*{user_who_posted_duplicate}*, ogarnij się! Masz Ty Rozum i Godność Człowieka? "
-"Link {duplicate_url} był już zapodany przez juzera *{user_who_posted_first}* na "
-"kanale *#{channel_name}* raptem *{number_of_minutes} min.* temu."
+"*{user_who_posted_duplicate}*, ogarnij się! Masz Ty Rozum i Godność "
+"Człowieka? Link {duplicate_url} był już zapodany przez juzera "
+"*{user_who_posted_first}* na kanale *#{channel_name}* raptem *{time}* temu."
