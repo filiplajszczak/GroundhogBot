@@ -64,7 +64,14 @@ def check_url(url, ts, user, chan):
         who = find_user(who)
         where = find_channel(where)
         bad_user = find_user(user)
-        minutes = str(int((float(ts) - float(when)) / 60))
+        minutes = int((float(ts) - float(when)) / 60)
+        if minutes <= 120:
+            accumulated_time = _("{number_of_minutes} min.").format(number_of_minutes=str(minutes))
+        elif minutes <= 2880:
+            accumulated_time = _("{number_of_hours} hours").format(number_of_hours=str(minutes//60))
+        else:
+            accumulated_time = _("{number_of_days} days").format(number_of_days=str(minutes // 1440))
+
         slack_client.api_call(
             "reactions.add",
             channel=chan,
@@ -76,9 +83,9 @@ def check_url(url, ts, user, chan):
             username="GroundhogBot",
             text=_("*{user_who_posted_duplicate}*, look! Are you paying attention? "
                  "{duplicate_url} was already posted by *{user_who_posted_first}* "
-                 "on channel *#{channel_name}* just *{number_of_minutes} min.* ago.")
+                 "on channel *#{channel_name}* just *{time}* ago.")
                  .format(user_who_posted_duplicate=bad_user, duplicate_url=url, user_who_posted_first=who,
-                         channel_name=where, number_of_minutes=minutes))
+                         channel_name=where, time=accumulated_time))
     conn.close()
 
 def append_url(url, ts, user, chan):
