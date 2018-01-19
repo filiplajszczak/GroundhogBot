@@ -206,7 +206,7 @@ if __name__ == "__main__":
     parser.add_argument('--reaction', type=str, default=config_default["reaction"],
                         help='Optional groundhog reaction emoji name')
     parser.add_argument('--language', type=str, default=config_default["language"],
-                        help='Set other language. (default: en_US, available: pl_PL, available: la_VA)')
+                        help='Set other language. (default: en_US, available: la_VA, pl_PL)')
     parser.add_argument('--rules', type=str, default=config_default["rules"],
                         help='Point json file establishing custom set of bot reaction rules (default: default.json)')
     args = parser.parse_args()
