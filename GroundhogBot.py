@@ -206,7 +206,7 @@ if __name__ == "__main__":
     parser.add_argument('--reaction', type=str, default=config_default["reaction"],
                         help='Optional groundhog reaction emoji name')
     parser.add_argument('--language', type=str, default=config_default["language"],
-                        help='Set other language. (default: en_US, available: pl_PL)')
+                        help='Set other language. (default: en_US, available: pl_PL, available: la_VA)')
     parser.add_argument('--rules', type=str, default=config_default["rules"],
                         help='Point json file establishing custom set of bot reaction rules (default: default.json)')
     args = parser.parse_args()
@@ -217,6 +217,9 @@ if __name__ == "__main__":
     if args.language == "pl_PL":
         pl_PL = gettext.translation('GroundhogBot', localedir='locale', languages=['pl_PL'])
         pl_PL.install()
+    elif args.language == "la_VA":
+        la_VA = gettext.translation('GroundhogBot', localedir='locale', languages=['la_VA'])
+        la_VA.install()
     else:
         _ = lambda s: s
 
